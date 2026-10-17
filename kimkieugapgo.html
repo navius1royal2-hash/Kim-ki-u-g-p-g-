@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thi Đua Trắc Nghiệm Truyện Kiều - Kim Kiều Gặp Gỡ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --primary-amber: #f59e0b;
+            --primary-amber-hover: #d97706;
+            --accent-purple: #8b5cf6;
+            --accent-rose: #f43f5e;
+            --accent-emerald: #10b981;
+            --text-light: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-gold: #fef08a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(245, 158, 11, 0.12) 0%, transparent 40%);
+        }
+
+        /* HEADER & SCOREBOARD */
+        header {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--card-border);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            padding: 12px 24px;
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo-title {
+            font-family: 'Merriweather', serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-amber);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .teams-scoreboard {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            flex: 1;
+            max-width: 750px;
+        }
+
+        .team-card {
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 12px;
+            padding: 8px 12px;
+            text-align: center;
+            transition: all 0.25s ease;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .team-card.active {
+            border-color: var(--primary-amber);
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+            background: #283548;
+        }
+
+        .team-name {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .team-card.active .team-name {
+            color: var(--primary-amber);
+        }
+
+        .team-score {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-light);
+            margin-top: 2px;
+        }
+
+        .score-anim {
+            position: absolute;
+            top: -15px;
+            right: 15px;
+            color: var(--accent-emerald);
+            font-weight: 800;
+            font-size: 1.1rem;
+            animation: floatUp 0.8s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 0; transform: translateY(5px); }
+            50% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(-20px); }
+        }
+
+        /* MAIN CONTAINER */
+        main {
+            flex: 1;
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 24px 16px;
+        }
+
+        /* START SCREEN */
+        .start-screen {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 36px 28px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .start-title {
+            font-family: 'Merriweather', serif;
+            font-size: 2rem;
+            color: var(--text-gold);
+            margin-bottom: 12px;
+        }
+
+        .start-subtitle {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-bottom: 28px;
+            line-height: 1.6;
+        }
+
+        .team-inputs-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .input-group label {
+            display: block;
+            text-align: left;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .input-group input {
+            width: 100%;
+            background: #0f172a;
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 12px 14px;
+            color: var(--text-light);
+            font-size: 0.95rem;
+            font-weight: 600;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary-amber);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary-amber), #d97706);
+            color: #000;
+            font-weight: 800;
+            font-size: 1.1rem;
+            padding: 14px 36px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+        }
+
+        /* QUIZ SCREEN */
+        .quiz-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .question-badge {
+            background: rgba(139, 92, 246, 0.2);
+            color: var(--accent-purple);
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .turn-indicator {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--primary-amber);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* POWER-UPS BAR */
+        .powerups-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px dashed var(--card-border);
+            align-items: center;
+        }
+
+        .powerups-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-right: 4px;
+            text-transform: uppercase;
+        }
+
+        .powerup-btn {
+            background: #1e293b;
+            border: 1px solid var(--card-border);
+            color: var(--text-light);
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .powerup-btn:hover:not(:disabled) {
+            border-color: var(--primary-amber);
+            background: #2d3d54;
+        }
+
+        .powerup-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            filter: grayscale(1);
+        }
+
+        .powerup-btn.active-double {
+            background: var(--accent-rose);
+            color: #fff;
+            border-color: var(--accent-rose);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.5); }
+            70% { box-shadow: 0 0 0 10px rgba(244, 63, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
+        }
+
+        /* WAGER MODAL / BAR */
+        .wager-box {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid var(--primary-amber);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .wager-text {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-gold);
+        }
+
+        .wager-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .wager-input {
+            width: 80px;
+            background: #0f172a;
+            border: 1px solid var(--primary-amber);
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            font-weight: 700;
+            line-height: 1.6;
+            color: var(--text-light);
+            margin-bottom: 24px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .option-btn {
+            background: #0f172a;
+            border: 1.5px solid var(--card-border);
+            border-radius: 12px;
+            padding: 14px 18px;
+            text-align: left;
+            color: var(--text-light);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .option-prefix {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-muted);
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .option-btn:hover:not(.disabled) {
+            border-color: var(--primary-amber);
+            background: #182238;
+        }
+
+        .option-btn.correct {
+            background: rgba(16, 185, 129, 0.15) !important;
+            border-color: var(--accent-emerald) !important;
+            color: #a7f3d0 !important;
+        }
+
+        .option-btn.correct .option-prefix {
+            background: var(--accent-emerald);
+            color: #000;
+            border-color: var(--accent-emerald);
+        }
+
+        .option-btn.incorrect {
+            background: rgba(244, 63, 94, 0.15) !important;
+            border-color: var(--accent-rose) !important;
+            color: #fecdd3 !important;
+        }
+
+        .option-btn.incorrect .option-prefix {
+            background: var(--accent-rose);
+            color: #fff;
+            border-color: var(--accent-rose);
+        }
+
+        .option-btn.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .option-btn.hidden-5050 {
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        /* EXPLANATION BOX */
+        .explanation-card {
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid var(--accent-purple);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: none;
+        }
+
+        .explanation-card.show {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .exp-title {
+            font-weight: 800;
+            color: #c084fc;
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .exp-body {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        .next-btn-container {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        /* RESULT SCREEN */
+        .result-screen {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 36px 28px;
+            text-align: center;
+        }
+
+        .champion-box {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(139, 92, 246, 0.2));
+            border: 2px solid var(--primary-amber);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .champion-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            font-weight: 800;
+            color: var(--primary-amber);
+            letter-spacing: 1px;
+        }
+
+        .champion-name {
+            font-family: 'Merriweather', serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text-gold);
+            margin: 8px 0;
+        }
+
+        .champion-score {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--text-light);
+        }
+
+        .final-leaderboard {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 36px;
+        }
+
+        .final-rank-item {
+            background: #0f172a;
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .rank-info {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-weight: 700;
+        }
+
+        .rank-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+        }
+
+        .rank-1 .rank-num { background: #f59e0b; color: #000; }
+        .rank-2 .rank-num { background: #94a3b8; color: #000; }
+        .rank-3 .rank-num { background: #b45309; color: #fff; }
+
+        @media (max-width: 640px) {
+            .teams-scoreboard { grid-template-columns: repeat(2, 1fr); }
+            .team-inputs-grid { grid-template-columns: 1fr; }
+            .wager-box { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER & SCOREBOARD -->
+    <header>
+        <div class="header-container">
+            <div class="logo-title">
+                📖 Kim - Kiều Gặp Gỡ
+            </div>
+            <div class="teams-scoreboard" id="scoreboard">
+                <!-- Dynamic Teams Score Cards -->
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN APP CONTAINER -->
+    <main>
+        <!-- START SCREEN -->
+        <div id="start-screen" class="start-screen">
+            <h1 class="start-title">THI ĐUA TRẮC NGHIỆM TRUYỆN KIỀU</h1>
+            <p class="start-subtitle">Bộ 20 câu hỏi phân tích sâu sắc đoạn thơ Kim - Kiều gặp gỡ.<br>Dành cho 4 đội thi đấu, tích hợp các Thẻ bổ trợ chiến thuật và Cược điểm!</p>
+            
+            <div class="team-inputs-grid">
+                <div class="input-group">
+                    <label>Tên Đội 1:</label>
+                    <input type="text" id="team-0-input" value="Đội Kim Trọng">
+                </div>
+                <div class="input-group">
+                    <label>Tên Đội 2:</label>
+                    <input type="text" id="team-1-input" value="Đội Thúy Kiều">
+                </div>
+                <div class="input-group">
+                    <label>Tên Đội 3:</label>
+                    <input type="text" id="team-2-input" value="Đội Thúy Vân">
+                </div>
+                <div class="input-group">
+                    <label>Tên Đội 4:</label>
+                    <input type="text" id="team-3-input" value="Đội Vương Quan">
+                </div>
+            </div>
+
+            <button class="btn" onclick="startQuiz()">BẮT ĐẦU TRẬN ĐẤU</button>
+        </div>
+
+        <!-- QUIZ SCREEN -->
+        <div id="quiz-screen" class="quiz-card" style="display: none;">
+            <div class="quiz-header">
+                <span class="question-badge" id="question-badge">Câu 1 / 20 (Trung bình)</span>
+                <div class="turn-indicator">
+                    🎯 Lượt thi: <span id="current-turn-name" style="color: var(--primary-amber);">Đội 1</span>
+                </div>
+            </div>
+
+            <!-- POWER-UPS BAR -->
+            <div class="powerups-bar">
+                <span class="powerups-title">Thẻ trợ giúp:</span>
+                <button class="powerup-btn" id="btn-5050" onclick="usePowerup5050()">
+                    🔮 Gương Nga Mách Bảo (50/50)
+                </button>
+                <button class="powerup-btn" id="btn-double" onclick="usePowerupDouble()">
+                    ⚡ Duyên Tiền Định (x2)
+                </button>
+            </div>
+
+            <!-- WAGER BAR (For Q20) -->
+            <div id="wager-box" class="wager-box" style="display: none;">
+                <div class="wager-text">🔥 VÒNG VẬN DỤNG CAO: CƯỢC ĐIỂM TƯƠNG TƯ</div>
+                <div class="wager-controls">
+                    <label style="font-size: 0.85rem; font-weight: 600;">Mức cược:</label>
+                    <input type="number" id="wager-amount" class="wager-input" value="10" min="5" max="50">
+                    <span style="font-size: 0.85rem; color: var(--text-muted);">điểm</span>
+                </div>
+            </div>
+
+            <!-- QUESTION TEXT -->
+            <div class="question-text" id="question-text">
+                Nội dung câu hỏi sẽ hiển thị ở đây...
+            </div>
+
+            <!-- OPTIONS GRID -->
+            <div class="options-grid" id="options-grid">
+                <!-- Options rendered dynamically -->
+            </div>
+
+            <!-- EXPLANATION -->
+            <div class="explanation-card" id="explanation-card">
+                <div class="exp-title">💡 Giải thích chi tiết:</div>
+                <div class="exp-body" id="explanation-text">Nội dung giải thích...</div>
+            </div>
+
+            <!-- NEXT BUTTON -->
+            <div class="next-btn-container">
+                <button class="btn" id="next-btn" onclick="nextQuestion()" style="display: none;">CÂU TIẾP THEO ➔</button>
+            </div>
+        </div>
+
+        <!-- RESULT SCREEN -->
+        <div id="result-screen" class="result-screen" style="display: none;">
+            <div class="champion-box">
+                <div class="champion-title">🏆 ĐỘI VÔ ĐỊCH 🏆</div>
+                <div class="champion-name" id="winner-name">ĐỘI KIM TRỌNG</div>
+                <div class="champion-score" id="winner-score">Đạt: 120 điểm</div>
+            </div>
+
+            <h2 style="font-size: 1.2rem; margin-bottom: 16px; color: var(--text-gold);">BẢNG XẾP HẠNG CHUNG CUỘC</h2>
+            <div class="final-leaderboard" id="final-leaderboard">
+                <!-- Leaderboard items rendered dynamically -->
+            </div>
+
+            <button class="btn" onclick="location.reload()">THI ĐẤU LẠI</button>
+        </div>
+    </main>
+
+    <script>
+        // 20 QUESTIONS DATASET
+        const quizData = [
+            // CÂU 1-10: TRUNG BÌNH
+            {
+                q: "1. Trong các câu thơ đầu, sự xuất hiện của Kim Trọng làm cho cảnh vật xung quanh hiện lên như thế nào qua cái nhìn đầy thiện cảm của hai chị em?",
+                options: [
+                    "Trở nên u buồn, tịch mịch dưới bóng chiều tà.",
+                    "Trở nên đẹp đẽ, sang trọng như 'Một vùng như thể cây quỳnh cành dao'.",
+                    "Bắt đầu âm u, u tối báo hiệu sóng gió.",
+                    "Trở nên nhộn nhịp, ồn ào bởi tiếng xe ngựa."
+                ],
+                correct: 1,
+                level: "Trung bình",
+                exp: "Hình ảnh ước lệ 'cây quỳnh cành dao' miêu tả vẻ đẹp quý phái của Kim Trọng, đồng thời làm cho cảnh vật xung quanh bừng sáng qua đôi mắt say đắm của nhân vật."
+            },
+            {
+                q: "2. Hai câu thơ 'Nền phú hậu bậc tài danh / Văn chương nết đất thông minh tính trời' giới thiệu những đặc điểm nào của Kim Trọng?",
+                options: [
+                    "Vẻ đẹp ngoại hình tuấn tú và trang phục quý phái.",
+                    "Gia thế giàu sang, dòng dõi và tài năng, trí tuệ thiên bẩm.",
+                    "Sự dũng cảm và chí lớn lập công danh.",
+                    "Tính cách ngông cuồng và sự phung phí tiền bạc."
+                ],
+                correct: 1,
+                level: "Trung bình",
+                exp: "'Nền phú hậu' chỉ gia thế giàu có, dòng dõi quý tộc ('nết đất'); 'thông minh tính trời' nhấn mạnh tài năng bẩm sinh của Kim Trọng."
+            },
+            {
+                q: "3. Từ 'nết đất' trong câu 'Văn chương nết đất thông minh tính trời' có nghĩa chính xác là gì?",
+                options: [
+                    "Tính cách khiêm tốn, điềm đạm như đất đai.",
+                    "Truyền thống văn hóa, phong hóa của quê hương, dòng họ.",
+                    "Sự siêng năng, cần cù trong việc cày cấy ruộng đất.",
+                    "Đất đai màu mỡ do tổ tiên để lại."
+                ],
+                correct: 1,
+                level: "Trung bình",
+                exp: "'Nết đất' ở đây dùng để chỉ truyền thống văn hóa, nếp nhà, phong hóa gia phong lâu đời tốt đẹp."
+            },
+            {
+                q: "4. Hành động của hai chị em Thúy Kiều khi thấy Kim Trọng xuất hiện và chào Vương Quan được miêu tả qua chi tiết nào?",
+                options: [
+                    "Chủ động cất lời chào hỏi Kim Trọng.",
+                    "'Hai kiều e lệ nép vào dưới hoa'.",
+                    "Vội vã quay lưng chạy thẳng về nhà.",
+                    "Đứng lại quan sát và bàn tán xôn xao."
+                ],
+                correct: 1,
+                level: "Trung bình",
+                exp: "Câu 'Hai kiều e lệ nép vào dưới hoa' khắc họa nét e ấp, kín đáo, đúng mực của hai người thiếu nữ phong kiến."
+            },
+            {
+                q: "5. Bức tranh thiên nhiên lúc Kim Trọng lên ngựa ra về được khắc họa qua những hình ảnh thơ nào?",
+                options: [
+                    "Nắng hè gay gắt, tiếng ve kêu rộn rã.",
+                    "'Dưới cầu nước chảy trong veo / Bên cầu tơ liễu bóng chiều thướt tha'.",
+                    "Rừng thu thay áo mới, lá vàng rơi đầy đường.",
+                    "Sương mù bao phủ, đường đi gập ghềnh hiểm trở."
+                ],
+                correct: 1,
+                level: "Trung bình",
+                exp: "Hai câu thơ tả cảnh hoàng hôn êm đềm với dòng nước 'trong veo' và 'bóng chiều thướt tha' vương vấn bước chân người đi."
+            },
+            {
+                q: "6. Câu thơ 'Mặt trời gác núi chiêng đà thu không' gợi tả khoảng thời gian và không gian nào?",
+                options: [
+                    "Buổi sáng sớm khi tiếng trống chầu vang lên.",
+                    "Chập tối khi mặt trời lặn sau núi và tiếng chiêng thu quân/thu không vang lên.",
+                    "Đêm khuya thanh vắng khi tĩnh không.",
+                    "Buổi trưa hè oi ả khi tiếng chiêng báo giờ nghỉ."
+                ],
+                correct: 1,
+                level: "Trung bình",
+                exp: "'Mặt trời gác núi' tả cảnh hoàng hôn lặn, 'chiêng đà thu không' chỉ tiếng chiêng báo hiệu chiều tối kết thúc một ngày."
+            },
+            {
+                q: "7. Hình ảnh 'Hải đường lả ngọn đông lân / Giọt sương gieo nặng cành xuân la đà' diễn tả điều gì?",
+                options: [
+                    "Cảnh vườn hoa hải đường bị tàn phá bởi trận mưa đêm.",
+                    "Cảnh đêm xuân tĩnh lặng, cành hải đường trĩu đọng đẫm sương đêm.",
+                    "Cảnh buổi sáng sớm rực rỡ hoa nở.",
+                    "Hình ảnh Thúy Kiều đang bẻ cành hải đường tặng Kim Trọng."
+                ],
+                correct: 1,
+                level: "Trung bình",
+                exp: "Hình ảnh gợi tả không gian đêm khuya yên vắng, giọt sương đêm đọng nặng làm cành hoa hải đường ngả xòa mềm mại."
+            },
+            {
+                q: "8. Sau khi trở về phòng khuê ('trướng hoa'), Thúy Kiều rơi vào trạng thái tâm lý như thế nào lúc đêm xuống?",
+                options: [
+                    "Lặng lẽ đi vào giấc ngủ nhanh chóng vì mệt mỏi.",
+                    "Oán trách gia đình vì đã đưa mình đi hội Thanh minh.",
+                    "Trằn trọc 'Một mình lặng ngắm bóng nga', tâm trạng 'Ngổn ngang trăm mối bên lòng'.",
+                    "Vui mừng reo hò và kể lại cho Thúy Vân nghe."
+                ],
+                correct: 2,
+                level: "Trung bình",
+                exp: "Kiều thao thức một mình ngắm trăng ('bóng nga'), lòng tràn ngập cảm xúc xao xuyển, tương tư không ngủ được."
+            },
+            {
+                q: "9. Từ láy 'bởi bởi' trong câu 'Rộn đường gần với nỗi xa bởi bởi' mang nghĩa là gì?",
+                options: [
+                    "Sự bối rối, ngổn ngang, xáo trộn không ngừng trong tâm trí.",
+                    "Sự quyết đoán, dứt khoát không hề do dự.",
+                    "Nỗi buồn bã, tuyệt vọng hoàn toàn.",
+                    "Sự vui mừng bộc phát mãnh liệt."
+                ],
+                correct: 0,
+                level: "Trung bình",
+                exp: "'Bởi bởi' là một từ cổ biểu thị trạng thái tâm tư ngổn ngang, ngập tràn muôn vàn mối nghĩ xao xuyến."
+            },
+            {
+                q: "10. Nhận định nào phản ánh đúng nhất chuyển biến cảm xúc của Thúy Kiều từ lúc gặp Kim Trọng đến khi trở về nhà trong đoạn trích?",
+                options: [
+                    "Từ ngỡ ngàng -> sợ hãi -> tuyệt vọng.",
+                    "Từ e ấp, rung động -> lưu luyến lúc chia tay -> trằn trọc, tương tư và băn khoăn về duyên nợ.",
+                    "Từ dửng dưng -> vui vẻ -> quên hẳn cuộc gặp gỡ.",
+                    "Từ vui mừng -> nghi ngờ -> chủ động tìm gặp lại."
+                ],
+                correct: 1,
+                level: "Trung bình",
+                exp: "Sự phát triển tâm lý nhân vật diễn ra rất tự nhiên từ cái nhìn e e lệ ban đầu đến sự lưu luyến và trằn trọc tương tư suốt đêm."
+            },
+
+            // CÂU 11-20: KHÓ / VẬN DỤNG CAO
+            {
+                q: "11. Trong câu thơ 'Tình trong như đã, mặt ngoài còn e', việc Nguyễn Du lựa chọn sử dụng từ 'ĐÃ' thay vì các từ chỉ sự bắt đầu (như 'vừa', 'mới') mang ý nghĩa nghệ thuật gì?",
+                options: [
+                    "Nhấn mạnh rằng Kim Trọng và Thúy Kiều thực chất đã lén lút hẹn hò từ trước.",
+                    "Khắc họa tính chất 'tiền định' của duyên số: dẫu mới gặp nhưng tình cảm đã trọn vẹn, dạt dào tựa như đã thuộc về nhau từ kiếp trước.",
+                    "Cho thấy Thúy Kiều là người chủ động, dạn dĩ trong tình yêu phong kiến.",
+                    "Chỉ là cách dùng từ ngẫu nhiên của tác giả để đảm bảo đúng luật bằng - trắc."
+                ],
+                correct: 1,
+                level: "Nâng cao",
+                exp: "Từ 'đã' thể hiện tình cảm trọn vẹn, chín muồi tức thì (mối duyên tiền định) dẫu bề ngoài vẫn giữ nét e ấp nữ tính."
+            },
+            {
+                q: "12. Hai câu thơ 'Chập chờn cơn tỉnh cơn mê / Rốn ngồi chẳng tiện dứt về chỉn khôn' thể hiện trạng thái nội tâm nào của Thúy Kiều?",
+                options: [
+                    "Sự giằng xé giữa khao khát tình yêu tự do và sự níu giữ của ý thức lễ giáo phong kiến.",
+                    "Sự bốc đồng của tuổi trẻ khiến cô hoàn toàn quên mất các quy tắc ứng xử.",
+                    "Nỗi hoài nghi, do dự về thân thế thật sự của Kim Trọng trước khi quyết định trao gửi tình cảm.",
+                    "Sự u mê, mất kiểm soát tâm trí do ảnh hưởng từ cuộc gặp gỡ với linh hồn Đạm Tiên."
+                ],
+                correct: 0,
+                level: "Nâng cao",
+                exp: "Kiều muốn ở lại ('Rốn ngồi chẳng tiện') vì tiếng gọi tình yêu nhưng bắt buộc phải ra về ('dứt về chỉn khôn') vì lễ giáo nữ nhi."
+            },
+            {
+                q: "13. Khi Nguyễn Du tả Kim Trọng 'Phong tư tài mạo tót vời / Vào trong phong nhã ra ngoài hào hoa', điểm nhìn nghệ thuật chính ở đây xuất phát từ đâu?",
+                options: [
+                    "Góc nhìn khách quan, công tâm của người kể chuyện toàn tri đứng ngoài cuộc.",
+                    "Sự lồng ghép qua nhãn quan si đắm, ngưỡng mộ của chính Thúy Kiều khi nhìn người trong mộng.",
+                    "Nhãn quan đánh giá của xã hội phong kiến đương thời về một chuẩn mực nam nhi đỗ đạc.",
+                    "Điểm nhìn của Vương Quan khi giới thiệu người bạn học ưu tú của mình."
+                ],
+                correct: 1,
+                level: "Nâng cao",
+                exp: "Bút pháp nhập vai tài tình của Nguyễn Du: Vẻ đẹp rực rỡ của Kim Trọng hiện lên qua lăng kính si đắm, ngưỡng mộ của Thúy Kiều."
+            },
+            {
+                q: "14. Chi tiết 'Khách đà lên ngựa người còn nghé theo' miêu tả ánh mắt 'nghé theo' của Thúy Kiều nhằm thể hiện điều gì?",
+                options: [
+                    "Sự tò mò tự nhiên của một cô gái trẻ trước người xa lạ.",
+                    "Sự vương vấn, lưu luyến tha thiết, cái nhìn dõi theo đầy tình tứ và vô thức khi trái tim đã xao xuyển.",
+                    "Sự kiểm tra xem khách đã thực sự đi xa chưa để ra về.",
+                    "Nỗi e sợ Kim Trọng sẽ quay trở lại."
+                ],
+                correct: 1,
+                level: "Nâng cao",
+                exp: "Cái nhìn 'nghé theo' là phản ứng tự nhiên của trái tim đang yêu, dõi theo hình bóng người trong mộng một cách đầy vương vấn."
+            },
+            {
+                q: "15. Hình ảnh 'Dưới cầu nước chảy trong veo / Bên cầu tơ liễu bóng chiều thướt tha' lúc Kim Trọng ra về mang ý nghĩa nghệ thuật gì?",
+                options: [
+                    "Bức tranh tả thực không gian địa lý hoàng hôn, tạo sự đối lập hoàn toàn với cảm xúc hoan hỉ.",
+                    "Phản ánh sự tuyệt vọng, buồn tẻ và dự báo về một kết cục đổ vỡ, chia phôi ngay từ lần đầu gặp gỡ.",
+                    "Sự trong trẻo của tình yêu mới nở kết hợp với 'bóng chiều' gợi dư vị lưu luyến, băn khoăn.",
+                    "Khẳng định chắc chắn về một tương lai êm đềm, hoàn toàn hạnh phúc và không có sóng gió."
+                ],
+                correct: 2,
+                level: "Nâng cao",
+                exp: "Nước 'trong veo' tượng trưng sự tinh khôi của mối tình mới chớm; 'bóng chiều thướt tha' gieo vào lòng người nét lưu luyến băn khoăn."
+            },
+            {
+                q: "16. Lời tự vấn 'Người đâu gặp gỡ làm chi / Trăm năm biết có duyên gì hay không?' bộc lộ nét tâm lý sâu xa nào ở Kiều?",
+                options: [
+                    "Nỗi băn khoăn bộc phát từ một tâm hồn nhạy cảm, vừa rung động đã lập tức bị ám ảnh bởi dự cảm bi kịch.",
+                    "Sự hối hận sâu sắc vì đã lỡ nảy sinh tình cảm quá nhanh với một người nam tử lạ mặt.",
+                    "Sự tính toán thực dụng về các điều kiện cần và đủ để có thể tiến tới hôn nhân bền vững.",
+                    "Thái độ trách móc Vương Quan vì đã tự ý làm cầu nối giới thiệu Kim Trọng."
+                ],
+                correct: 0,
+                level: "Nâng cao",
+                exp: "Một trái tim vô cùng nhạy cảm: Ngay trong khoảnh khắc hạnh phúc, Kiều đã lập tức lo sợ và dự cảm về sự mong manh của duyên nợ."
+            },
+            {
+                q: "17. Ý nghĩa biểu tượng của bức tranh đêm 'Gương nga chênh chếch dòm song / Vàng gieo ngấn nước cây lồng bóng sân' đối với tâm trạng nhân vật là gì?",
+                options: [
+                    "Tả thực khung cảnh đêm muộn để nhấn mạnh sự trôi qua của thời gian.",
+                    "Tạo dựng không gian huyền ảo, soi chiếu nỗi niềm tương tư, cô đơn và xao xuyển trong lòng Thúy Kiều.",
+                    "Báo hiệu một điềm xấu sắp xảy ra với gia đình họ Vương.",
+                    "Nhấn mạnh sự giàu có, sang trọng trong khuôn viên nhà Thúy Kiều."
+                ],
+                correct: 1,
+                level: "Nâng cao",
+                exp: "Cảnh trăng đêm lung linh huyền ảo trở thành tấm gương soi bóng không gian tâm tưởng đầy tương tư và ngổn ngang của Kiều."
+            },
+            {
+                q: "18. Việc tác giả chuyển bối cảnh từ cuộc gặp gỡ ban ngày sang cảnh Thúy Kiều ngắm trăng đêm khuya có ý nghĩa nghệ thuật gì?",
+                options: [
+                    "Chuyển từ không gian ứng xử xã hội sang không gian nội tâm riêng tư để nhân vật tự do bộc lộ tương tư.",
+                    "Miêu tả sự thay đổi tâm trạng từ vui vẻ sang trạng thái chán nản, cô đơn tuyệt vọng.",
+                    "Đặt vẻ đẹp của Kim Trọng ban ngày vào sự so sánh với vẻ đẹp rực rỡ của ánh trăng rằm.",
+                    "Làm giảm nhịp điệu diễn biến của cốt truyện để chuẩn bị chuyển sang một biến cố mới."
+                ],
+                correct: 0,
+                level: "Nâng cao",
+                exp: "Màn đêm riêng tư trong phòng khuê là lúc rào cản lễ giáo lùi lại, nhường chỗ cho bản thể nội tâm trào dâng cảm xúc chân thật nhất."
+            },
+            {
+                q: "19. Cụm từ 'Nên câu tuyệt diệu ngụ trong tính tình' ở cuối đoạn trích khẳng định tài năng gì của Thúy Kiều?",
+                options: [
+                    "Tài ngâm thơ bay bổng khiến ai nghe cũng phải trầm ồ thán phục.",
+                    "Khả năng gửi gắm trọn vẹn những tâm tư, tình cảm xao xuyển chân thật nhất của lòng mình vào những câu thơ kiệt tác.",
+                    "Tài lẻ sáng tác nhạc phẩm để hát cho Kim Trọng nghe.",
+                    "Khả năng che giấu cảm xúc cá nhân rất giỏi không ai biết được."
+                ],
+                correct: 1,
+                level: "Nâng cao",
+                exp: "'Câu tuyệt diệu' là những câu thơ hay xuất thần, được kết tinh từ chính 'tính tình' (tâm tư, tình cảm) chân thành mãnh liệt."
+            },
+            {
+                q: "20. Nhận định nào sau đây đánh giá đúng nhất về giá trị nhân văn của Nguyễn Du qua đoạn thơ miêu tả tâm trạng Thúy Kiều sau cuộc gặp gỡ?",
+                options: [
+                    "Nguyễn Du thể hiện sự cảm thông, trân trọng đối với khao khát tình yêu tự do, chân chính và sự thức tỉnh bản thể của người phụ nữ.",
+                    "Tác giả nghiêm khắc phê phán Thúy Kiều vì đã vi phạm nghiêm trọng tư tưởng 'nam nữ thụ thụ bất thân'.",
+                    "Đoạn thơ chủ yếu đề cao tài làm thơ của Thúy Kiều chứ không chú trọng đến cảm xúc tình yêu.",
+                    "Tác giả muốn khẳng định vai trò quyết định của cha mẹ trong chuyện duyên phận lứa đôi."
+                ],
+                correct: 0,
+                level: "Nâng cao",
+                exp: "Giá trị nhân đạo nhân văn cao cả của Nguyễn Du chính là việc ca ngợi và trân trọng khao khát tình yêu tự do vươn lên trên rào cản phong kiến."
+            }
+        ];
+
+        // GAME STATE
+        let teams = [
+            { name: "Đội Kim Trọng", score: 0, power5050: true, powerDouble: true },
+            { name: "Đội Thúy Kiều", score: 0, power5050: true, powerDouble: true },
+            { name: "Đội Thúy Vân", score: 0, power5050: true, powerDouble: true },
+            { name: "Đội Vương Quan", score: 0, power5050: true, powerDouble: true }
+        ];
+
+        let currentQuestionIdx = 0;
+        let currentTurnIdx = 0; // 0..3
+        let isDoubleActive = false;
+        let isAnswered = false;
+
+        // INITIALIZE APP
+        function startQuiz() {
+            // Get Team Names
+            for (let i = 0; i < 4; i++) {
+                const inputVal = document.getElementById(`team-${i}-input`).value.trim();
+                if (inputVal) teams[i].name = inputVal;
+            }
+
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('quiz-screen').style.display = 'block';
+
+            renderScoreboard();
+            loadQuestion();
+        }
+
+        // RENDER SCOREBOARD
+        function renderScoreboard() {
+            const container = document.getElementById('scoreboard');
+            container.innerHTML = '';
+
+            teams.forEach((team, idx) => {
+                const card = document.createElement('div');
+                card.className = `team-card ${idx === currentTurnIdx ? 'active' : ''}`;
+                card.onclick = () => setTurn(idx);
+                card.innerHTML = `
+                    <div class="team-name">${team.name}</div>
+                    <div class="team-score" id="score-${idx}">${team.score}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function setTurn(idx) {
+            if (isAnswered) return;
+            currentTurnIdx = idx;
+            renderScoreboard();
+            document.getElementById('current-turn-name').textContent = teams[currentTurnIdx].name;
+            updatePowerupButtonsState();
+        }
+
+        // LOAD QUESTION
+        function loadQuestion() {
+            isAnswered = false;
+            isDoubleActive = false;
+
+            const qData = quizData[currentQuestionIdx];
+
+            // Update Badge & Turn
+            document.getElementById('question-badge').textContent = `Câu ${currentQuestionIdx + 1} / 20 (${qData.level})`;
+            document.getElementById('current-turn-name').textContent = teams[currentTurnIdx].name;
+
+            // Question & Explanation
+            document.getElementById('question-text').textContent = qData.q;
+            document.getElementById('explanation-card').classList.remove('show');
+            document.getElementById('next-btn').style.display = 'none';
+
+            // Show Wager for Question 20
+            if (currentQuestionIdx === 19) {
+                document.getElementById('wager-box').style.display = 'flex';
+            } else {
+                document.getElementById('wager-box').style.display = 'none';
+            }
+
+            // Render Options
+            const optionsGrid = document.getElementById('options-grid');
+            optionsGrid.innerHTML = '';
+
+            const prefixes = ['A', 'B', 'C', 'D'];
+            qData.options.forEach((optText, optIdx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.id = `opt-${optIdx}`;
+                btn.onclick = () => handleAnswer(optIdx);
+                btn.innerHTML = `
+                    <span class="option-prefix">${prefixes[optIdx]}</span>
+                    <span>${optText}</span>
+                `;
+                optionsGrid.appendChild(btn);
+            });
+
+            updatePowerupButtonsState();
+            renderScoreboard();
+        }
+
+        // POWERUP: 50/50
+        function usePowerup5050() {
+            if (isAnswered) return;
+            const currentTeam = teams[currentTurnIdx];
+            if (!currentTeam.power5050) return;
+
+            const qData = quizData[currentQuestionIdx];
+            const correctIdx = qData.correct;
+
+            // Pick 2 wrong indices
+            let wrongIndices = [];
+            for (let i = 0; i < 4; i++) {
+                if (i !== correctIdx) wrongIndices.push(i);
+            }
+            // Shuffle and hide 2
+            wrongIndices.sort(() => Math.random() - 0.5);
+            document.getElementById(`opt-${wrongIndices[0]}`).classList.add('hidden-5050');
+            document.getElementById(`opt-${wrongIndices[1]}`).classList.add('hidden-5050');
+
+            // Consume powerup
+            currentTeam.power5050 = false;
+            updatePowerupButtonsState();
+        }
+
+        // POWERUP: DOUBLE
+        function usePowerupDouble() {
+            if (isAnswered) return;
+            const currentTeam = teams[currentTurnIdx];
+            if (!currentTeam.powerDouble) return;
+
+            isDoubleActive = !isDoubleActive;
+            const btn = document.getElementById('btn-double');
+            if (isDoubleActive) {
+                btn.classList.add('active-double');
+            } else {
+                btn.classList.remove('active-double');
+            }
+        }
+
+        function updatePowerupButtonsState() {
+            const currentTeam = teams[currentTurnIdx];
+            const btn5050 = document.getElementById('btn-5050');
+            const btnDouble = document.getElementById('btn-double');
+
+            btn5050.disabled = !currentTeam.power5050 || isAnswered;
+            btnDouble.disabled = !currentTeam.powerDouble || isAnswered;
+
+            if (!isDoubleActive) {
+                btnDouble.classList.remove('active-double');
+            }
+        }
+
+        // HANDLE ANSWER
+        function handleAnswer(selectedIndex) {
+            if (isAnswered) return;
+            isAnswered = true;
+
+            const qData = quizData[currentQuestionIdx];
+            const isCorrect = (selectedIndex === qData.correct);
+
+            // Highlight Correct/Incorrect Buttons
+            const selectedBtn = document.getElementById(`opt-${selectedIndex}`);
+            const correctBtn = document.getElementById(`opt-${qData.correct}`);
+
+            if (isCorrect) {
+                selectedBtn.classList.add('correct');
+            } else {
+                selectedBtn.classList.add('incorrect');
+                correctBtn.classList.add('correct');
+            }
+
+            // Disable all option buttons
+            for (let i = 0; i < 4; i++) {
+                const b = document.getElementById(`opt-${i}`);
+                if (b) b.classList.add('disabled');
+            }
+
+            // Calculate Points
+            let pointsGained = 0;
+            if (currentQuestionIdx === 19) {
+                // Wager mode for Question 20
+                const wagerVal = parseInt(document.getElementById('wager-amount').value) || 10;
+                pointsGained = isCorrect ? wagerVal : -wagerVal;
+            } else {
+                // Standard mode
+                let basePoints = 10;
+                if (isDoubleActive) {
+                    pointsGained = isCorrect ? 20 : -5;
+                    teams[currentTurnIdx].powerDouble = false; // consume
+                } else {
+                    pointsGained = isCorrect ? 10 : 0;
+                }
+            }
+
+            // Update Team Score
+            teams[currentTurnIdx].score += pointsGained;
+
+            // Score Animation
+            if (pointsGained !== 0) {
+                showScoreAnim(currentTurnIdx, pointsGained);
+            }
+
+            renderScoreboard();
+
+            // Show Explanation
+            document.getElementById('explanation-text').textContent = qData.exp;
+            document.getElementById('explanation-card').classList.add('show');
+            document.getElementById('next-btn').style.display = 'inline-block';
+
+            // Confetti for correct answer
+            if (isCorrect && typeof confetti === 'function') {
+                confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+            }
+        }
+
+        function showScoreAnim(teamIdx, points) {
+            const card = document.getElementsByClassName('team-card')[teamIdx];
+            if (!card) return;
+
+            const anim = document.createElement('div');
+            anim.className = 'score-anim';
+            anim.style.color = points > 0 ? '#10b981' : '#f43f5e';
+            anim.textContent = points > 0 ? `+${points}` : `${points}`;
+            card.appendChild(anim);
+
+            setTimeout(() => anim.remove(), 800);
+        }
+
+        // NEXT QUESTION
+        function nextQuestion() {
+            currentQuestionIdx++;
+
+            if (currentQuestionIdx < quizData.length) {
+                // Auto rotate turn to next team
+                currentTurnIdx = (currentTurnIdx + 1) % 4;
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        // SHOW FINAL RESULTS
+        function showResults() {
+            document.getElementById('quiz-screen').style.display = 'none';
+            document.getElementById('result-screen').style.display = 'block';
+
+            // Sort teams by score
+            const sortedTeams = [...teams].sort((a, b) => b.score - a.score);
+
+            // Winner
+            const winner = sortedTeams[0];
+            document.getElementById('winner-name').textContent = winner.name;
+            document.getElementById('winner-score').textContent = `Tổng điểm: ${winner.score} điểm`;
+
+            // Render Leaderboard
+            const board = document.getElementById('final-leaderboard');
+            board.innerHTML = '';
+
+            sortedTeams.forEach((t, rank) => {
+                const item = document.createElement('div');
+                item.className = `final-rank-item rank-${rank + 1}`;
+                item.innerHTML = `
+                    <div class="rank-info">
+                        <div class="rank-num">${rank + 1}</div>
+                        <div>${t.name}</div>
+                    </div>
+                    <div style="font-size: 1.1rem; font-weight: 800; color: var(--text-gold);">${t.score} điểm</div>
+                `;
+                board.appendChild(item);
+            });
+
+            // Winner Confetti
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
+            }
+        }
+    </script>
+</body>
+</html>
